@@ -171,7 +171,7 @@ U='https://github.com/stels54/claude-code-harness/blob/main/no-such-file.md'
 | 1 | `printf 'x [a](no-such-file.md)\n' > zz-a.md` → скрипт | `zz-a.md:1: md: no-such-file.md`, exit 1 |
 | 2 | `printf 'y %s\n' "$U" > zz-b.md` → скрипт | `zz-b.md:1: repo: <U>`, exit 1 |
 | 3 | `printf '%s\n' "$U" > zz-c.txt` → скрипт | `zz-c.txt:1: repo: <U>`, exit 1 |
-| 4 | в `zz-d.md` обе ссылки из 1–2, каждая в обратных кавычках | для `zz-d.md` строк нет |
+| 4 | ``printf '`%s`\n`%s`\n' "$(cat zz-a.md)" "$U" > zz-d.md`` → скрипт (обе ссылки из 1–2 в обратных кавычках) | для `zz-d.md` строк нет |
 | 5 | `printf 'export const T = () => <a href="#no-anchor">x</a>\n' > site/src/Tmp.tsx` → скрипт | `site/src/Tmp.tsx:1: anchor: #no-anchor`, exit 1 |
 | 6 | `zz-e.txt` с `…/claude-code-harness/blob/main/harness` (каталог через `blob`) | строка `repo` (для каталога нужен `tree`) |
 | 7 | `zz-f.txt` с `…/claude-code-harness/tree/main/harness` и `…/blob/main/README.md` | нарушений для `zz-f.txt` нет |
@@ -180,29 +180,35 @@ U='https://github.com/stels54/claude-code-harness/blob/main/no-such-file.md'
 
 ### 5.2. `scripts/hooks/pre-push`
 
-Во временном клоне, с безвредным токеном во временном списке:
+Во временном клоне, с безвредным токеном во временном списке. Токен
+генерируется на лету: буквальная строка в мануале сама попадала бы под
+проверку и давала лишние совпадения в `docs/manual/`.
 ```bash
-W=$(mktemp -d); H="$PWD/scripts/hooks/pre-push"
+W=$(mktemp -d); H="$PWD/scripts/hooks/pre-push"; P="zqx$(date +%s)probe"
 git clone -q . "$W/repo"; cd "$W/repo"
-echo zqxprobetoken > "$W/deny.txt"; export HARNESS_DENYLIST="$W/deny.txt"
+echo "$P" > "$W/deny.txt"; export HARNESS_DENYLIST="$W/deny.txt"
 push() { echo "refs/heads/main $1 refs/heads/main 0" | "$H" origin x; echo "exit=$?"; }
+push $(git rev-parse HEAD)
 ```
+Базовая линия до сценариев: `check-leaks: 0 совпадений`, `exit=0`. Иначе
+токен уже есть в репозитории, строки 1–3 ничего не докажут.
 
 | # | Действие | Ожидание |
 |---|----------|----------|
-| 1 | `echo zqxprobetoken > probe.txt; git add probe.txt; git commit -qm a; push $(git rev-parse HEAD)` | `probe.txt:1: denylist`, `pre-push: check-leaks вернул 1 …, push отменён`, `exit=1` |
-| 2 | `git rm -q probe.txt; printf 'p.txt export-ignore\n' > .gitattributes; echo zqxprobetoken > p.txt; git add .gitattributes p.txt; git commit -qm b; push $(git rev-parse HEAD)` | `p.txt:1: denylist`, `exit=1` |
-| 3 | `git rm -q p.txt .gitattributes; mkdir -p site; printf 'x.local\n' > site/.gitignore; echo zqxprobetoken > site/x.local; git add site/.gitignore; git add -f site/x.local; git commit -qm c; push $(git rev-parse HEAD)` | `site/x.local:1: denylist`, `exit=1` |
+| 1 | `echo "$P" > probe.txt; git add probe.txt; git commit -qm a; push $(git rev-parse HEAD)` | ровно одно совпадение `probe.txt:1: denylist`, `check-leaks: 1 совпадений`, `pre-push: check-leaks вернул 1 …, push отменён`, `exit=1` |
+| 2 | `git rm -q probe.txt; printf 'p.txt export-ignore\n' > .gitattributes; echo "$P" > p.txt; git add .gitattributes p.txt; git commit -qm b; push $(git rev-parse HEAD)` | ровно одно совпадение `p.txt:1: denylist`, `exit=1` |
+| 3 | `git rm -q p.txt .gitattributes; mkdir -p site; printf 'x.local\n' > site/.gitignore; echo "$P" > site/x.local; git add site/.gitignore; git add -f site/x.local; git commit -qm c; push $(git rev-parse HEAD)` | ровно одно совпадение `site/x.local:1: denylist`, `exit=1` |
 | 4 | `push 1111111111111111111111111111111111111111` | `pre-push: нет коммита 1111… (refs/heads/main), push отменён`, `exit=2`, сканер не запускается |
 | 5 | `HARNESS_DENYLIST=/нет/файла push $(git rev-parse HEAD)` | `check-leaks: нет списка запрещённых строк: /нет/файла`, `exit=2` |
 | 6 | stdin — строка удаления ветки: `echo "(delete) 0000000000000000000000000000000000000000 refs/heads/x 0" \| "$H" origin x` | ничего не проверяется, exit 0 |
 
-После: `cd -; rm -rf "$W"; unset HARNESS_DENYLIST`.
+После: `cd -; rm -rf "$W"; unset HARNESS_DENYLIST P`.
 
 ## 6. Edge cases
 
 - **Нечитаемый файл в проверке ссылок**: `printf 'x\n' > zz-u.txt; chmod 000
-  zz-u.txt; scripts/check-links.sh` → `check-links: ошибка чтения zz-u.txt,
+  zz-u.txt; scripts/check-links.sh` → в stderr сначала `grep: zz-u.txt:
+  Permission denied`, затем `check-links: ошибка чтения zz-u.txt,
   проверка неполна`, exit 2. Удалить `rm -f zz-u.txt`.
 - **`node_modules` и `dist` не проверяются**: `git check-ignore
   site/node_modules site/dist` → выводит оба пути;

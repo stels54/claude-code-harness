@@ -48,7 +48,7 @@ lessons вырезаны. Два скрипта:
 
 1. Рабочий каталог — корень репозитория `claude-code-harness`, коммит с
    trailer `Plan: 2026-10-11_1303_public-showcase-1-harness-snapshot.md`
-   (`git log -1 --format=%B | tail -1`).
+   (`git log -1 --format=%B | sed '/^$/d' | tail -1`).
 2. Установлен Claude Code (`claude --version`), есть аккаунт для входа.
    `codex` не обязателен: без него `/plan` выводит «Кросс-ревью: ⏭️ (codex не
    установлен)», это не ошибка.
@@ -164,7 +164,7 @@ claude -p "/plan Добавить в корень файл hello.txt со стр
 | `for f in commands/{verify,code-review,plan-fix,fix-tests,manual,roadmap}.md agents/verifier.md hooks/notify.sh hooks/pipeline-clock.sh; do cmp ~/.claude/$f harness/$f; done` | пустой вывод (только чтение `~/.claude`) |
 | `diff ~/.claude/commands/implement.md harness/commands/implement.md` | `72,74d71` — удалён абзац про скилл lessons |
 | `diff ~/.claude/CLAUDE.md harness/CLAUDE.md` | `43,46d42` — удалён раздел `## Харнес` |
-| `diff ~/.claude/commands/plan.md harness/commands/plan.md` | только удаление 13 ссылок `(lessons: …)` и двух предложений «подключи скилл lessons» в п. 6 кросс-ревью |
+| `diff ~/.claude/commands/plan.md harness/commands/plan.md` | только удаление 13 ссылок `(lessons: …)` и блока из двух предложений в п. 6 кросс-ревью (о системном пробеле и «подключи скилл lessons») |
 | `jq -e 'keys == ["hooks"]' harness/settings-hooks.json` | `true` |
 | `test -x harness/hooks/notify.sh && test -x harness/hooks/pipeline-clock.sh && echo ok` | `ok` |
 | `head -1 LICENSE; grep -c 'Copyright (c) 2026' LICENSE` | `MIT License`, `1` |
@@ -192,9 +192,9 @@ printf '%s\n\n#x\n' "$P" > "$T/dl"
 | 5.1 | `printf 'a %s\n' "$K" > "$T/repo/f.txt"; HARNESS_DENYLIST="$T/dl" "$L" "$T/repo"; echo "exit=$?"` | `f.txt:1: key`, `check-leaks: 1 совпадений`, `exit=1` |
 | 5.2 | `printf 'b %s\n' "$U" > "$T/repo/f.txt"; HARNESS_DENYLIST="$T/dl" "$L" "$T/repo"; echo "exit=$?"` | `f.txt:1: home-path`, `exit=1`; строки `probeuser` в выводе нет |
 | 5.3 | `printf 'c %s\n' "$P" > "$T/repo/f.txt"; HARNESS_DENYLIST="$T/dl" "$L" "$T/repo"; echo "exit=$?"` | `f.txt:1: denylist`, `exit=1`; строки `zzleakprobe` в выводе нет |
-| 5.3а | Все три строки в одном файле + строка `clean` | ровно 3 строки (`key`, `home-path`, `denylist`), `check-leaks: 3 совпадений`, `exit=1` |
+| 5.3а | `printf '%s\n%s\n%s\nclean\n' "$K" "$U" "$P" > "$T/repo/f.txt"` и запуск как в 5.1 | ровно 3 строки (`key`, `home-path`, `denylist`), `check-leaks: 3 совпадений`, `exit=1` |
 | 5.3б | `printf 'risk-%s\n' "$(printf 'a%.0s' {1..25})" > "$T/repo/f.txt"` и запуск как в 5.1 | `check-leaks: 0 совпадений`, `exit=0` — левая граница шаблона `sk-` |
-| 5.3в | Плейсхолдер `` `/Users/...` `` в файле | `0 совпадений`: путь с точкой после `/Users/` не считается личным |
+| 5.3в | `printf 'см. `/Users/...`\n' > "$T/repo/f.txt"` и запуск как в 5.1 | `0 совпадений`: путь с точкой после `/Users/` не считается личным |
 
 ### check-harness-refs.sh
 
@@ -258,8 +258,11 @@ git -C <корень claude-code-harness> status --short
 ```
 
 **Ожидание:** `git status` пуст — сценарии ничего не записали в репозиторий;
-вывод `ls -la ~/.claude/pipeline-clock.jsonl; ls -la ~/.claude/commands`
-совпадает с сохранённым в разделе 3.
+вывод `ls -la ~/.claude/commands` совпадает с сохранённым в разделе 3.
+Размер и mtime `pipeline-clock.jsonl` могут измениться, если тестирование
+шло из сессии Claude Code с хуками рабочего `~/.claude`: журнал пишет сама
+сессия, багом не считать. Записей с путями временных каталогов в нём быть
+не должно.
 
 ## 9. Приложение: карта выходных кодов
 

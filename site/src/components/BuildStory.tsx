@@ -1,8 +1,12 @@
-import type { StepFragment } from '../pipeline/steps.ts'
 import { repoFileUrl } from '../repo.ts'
-import { BUILD_STORY, SELF_PLAN } from '../sections/build-story.ts'
+import {
+  BUILD_STORY,
+  PARTIAL_NOTE,
+  SELF_PLAN,
+  type StoryFragment as StoryFragmentData,
+} from '../sections/build-story.ts'
 
-function StoryFragment({ fragment }: { fragment: StepFragment }) {
+function StoryFragment({ fragment }: { fragment: StoryFragmentData }) {
   return (
     <figure className="step-fragment">
       <figcaption>
@@ -11,8 +15,12 @@ function StoryFragment({ fragment }: { fragment: StepFragment }) {
           href={repoFileUrl(fragment.path, { from: fragment.fromLine, to: fragment.toLine })}
           rel="noreferrer"
         >
-          {fragment.path}, строки {fragment.fromLine}–{fragment.toLine}
+          {fragment.path},{' '}
+          {fragment.fromLine === fragment.toLine
+            ? `строка ${fragment.fromLine}`
+            : `строки ${fragment.fromLine}–${fragment.toLine}`}
         </a>
+        {fragment.partial && `; ${PARTIAL_NOTE}`}
       </figcaption>
       <details>
         <summary>Фрагмент</summary>

@@ -129,6 +129,11 @@ export const FRAGMENT_SOURCES = {
     start: '| 5. Ручная проверка',
     end: '## Итог',
   },
+  'build-review1-rejected': {
+    path: 'docs/plans/2026-10-11_1303_public-showcase-1-harness-snapshot-review.md',
+    start: '| 2 | `/code-review` не видит',
+    end: '| 3 |',
+  },
   'build-verify4-repeat': {
     path: `${PLAN_4}-verify.md`,
     start: 'Повторная проверка',

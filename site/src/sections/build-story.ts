@@ -2,11 +2,18 @@ import fragments from 'virtual:pipeline-fragments'
 import type { FragmentName } from '../pipeline/fragment-sources.ts'
 import type { StepFragment } from '../pipeline/steps.ts'
 
+export type ReportClaim = { verdict: 'PASSED' | 'PARTIAL' | 'FAILED' } | { rejected: number }
+
+export interface StoryFragment extends StepFragment {
+  claim?: ReportClaim
+  partial?: boolean
+}
+
 export interface StoryEvent {
   id: string
   title: string
   text: string
-  fragments: StepFragment[]
+  fragments: StoryFragment[]
 }
 
 export interface StoryStage {
@@ -22,10 +29,21 @@ export interface BuildStory {
   stages: StoryStage[]
 }
 
-const frag = (name: FragmentName, label: string): StepFragment => ({
+const frag = (
+  name: FragmentName,
+  label: string,
+  extra: Pick<StoryFragment, 'claim' | 'partial'> = {},
+): StoryFragment => ({
   ...fragments[name],
   label,
+  ...extra,
 })
+
+const PASSED: Pick<StoryFragment, 'claim'> = { claim: { verdict: 'PASSED' } }
+const rejected = (count: number): Pick<StoryFragment, 'claim'> => ({ claim: { rejected: count } })
+
+export const PARTIAL_NOTE =
+  'показано не целиком: в пропущенной части слова, которые на сайте не используются; полный текст — по ссылке'
 
 export const BUILD_STORY: BuildStory = {
   title: 'Как собран этот сайт',
@@ -67,7 +85,9 @@ export const BUILD_STORY: BuildStory = {
           title: 'Пункт 4: стиль и схема конвейера',
           text: 'Критерии приёмки и «Не делаем» плана стиля и схемы.',
           fragments: [
-            frag('build-plan4-criteria', 'План пункта 4: начало критериев приёмки'),
+            frag('build-plan4-criteria', 'План пункта 4: начало критериев приёмки', {
+              partial: true,
+            }),
             frag('build-plan4-notdo', 'План пункта 4: «Не делаем»'),
           ],
         },
@@ -76,7 +96,9 @@ export const BUILD_STORY: BuildStory = {
           title: 'Пункт 5: остальные разделы',
           text: 'Критерии приёмки и «Не делаем» плана разделов «Зачем», «Устройство», «Ограничения» и подвала.',
           fragments: [
-            frag('build-plan5-criteria', 'План пункта 5: начало критериев приёмки'),
+            frag('build-plan5-criteria', 'План пункта 5: начало критериев приёмки', {
+              partial: true,
+            }),
             frag('build-plan5-notdo', 'План пункта 5: «Не делаем»'),
           ],
         },
@@ -98,7 +120,9 @@ export const BUILD_STORY: BuildStory = {
           title: 'Пункт 4: реализация остановилась на решении пользователя',
           text: 'Проверка бандла показала, что импорт документа целиком кладёт в сайт лишний текст. Реализация остановилась; пользователь решил вырезать фрагменты при сборке плагином. Так работают и фрагменты этого раздела.',
           fragments: [
-            frag('build-plan4-plugin', 'План пункта 4: «Решения», конец записи об отклонении'),
+            frag('build-plan4-plugin', 'План пункта 4: «Решения», конец записи об отклонении', {
+              partial: true,
+            }),
             frag('build-fact-raw', 'Роадмап: запись «Фактов» после пункта 4'),
           ],
         },
@@ -120,7 +144,7 @@ export const BUILD_STORY: BuildStory = {
           text: 'Проверки, которые агент выполнить не может, по решению пользователя не блокируют конвейер: пункт принимается, ручные проверки отложены человеку.',
           fragments: [
             frag('build-roadmap-deferred', 'Роадмап: «Решения»'),
-            frag('build-verify5-deferred', 'Отчёт проверки пункта 5: отложенный критерий'),
+            frag('build-verify5-deferred', 'Отчёт проверки пункта 5: отложенный критерий', PASSED),
           ],
         },
       ],
@@ -134,58 +158,66 @@ export const BUILD_STORY: BuildStory = {
           id: 'verify-3',
           title: 'Пункт 3: PASSED с отложенными пунктами',
           text: 'Публикацию и проверку опубликованного адреса агент выполнить не мог — они отложены, как и задумано планом.',
-          fragments: [frag('verifier', 'Отчёт проверки пункта 3: итог')],
+          fragments: [frag('verifier', 'Отчёт проверки пункта 3: итог', PASSED)],
         },
         {
           id: 'verify-4',
           title: 'Пункт 4: сначала PARTIAL, затем PASSED',
-          text: 'Первый прогон агента дал PARTIAL. После правок повторный прогон перезаписал отчёт, поэтому след первого остался только в «Решениях» плана.',
+          text: 'Первый прогон агента дал PARTIAL. После правок повторный прогон перезаписал отчёт, поэтому полного первого отчёта нет: его итог и причина записаны в «Решениях» плана и в шапке повторного отчёта.',
           fragments: [
             frag('build-plan4-partial', 'План пункта 4: «Решения» о первом прогоне'),
-            frag('build-verify4-repeat', 'Отчёт проверки пункта 4: шапка'),
-            frag('build-verify4-result', 'Отчёт проверки пункта 4: итог'),
+            frag('build-verify4-repeat', 'Отчёт проверки пункта 4: шапка', PASSED),
+            frag('build-verify4-result', 'Отчёт проверки пункта 4: итог', PASSED),
           ],
         },
         {
           id: 'verify-5',
           title: 'Пункт 5: PASSED с отложенными пунктами',
           text: 'Тёмная тема, сеть на опубликованном адресе и доступ из РФ остались человеку.',
-          fragments: [frag('build-verify5-result', 'Отчёт проверки пункта 5: итог')],
+          fragments: [frag('build-verify5-result', 'Отчёт проверки пункта 5: итог', PASSED)],
         },
       ],
     },
     {
       id: 'review',
       title: 'Ревью другой моделью',
-      lead: 'Codex смотрит план в /plan и дифф в /code-review. Замечания к плану разбираются в чате, в план попадают только принятые правки, вердикты в файлах не сохраняются. Отчёты ревью диффа лежат рядом с планами, и в них отклонённых замечаний нет.',
+      lead: 'Codex смотрит план в /plan и дифф в /code-review. Замечания к плану разбираются в чате, в план попадают только принятые правки, вердикты в файлах не сохраняются. Отчёты ревью диффа лежат рядом с планами. В показанных ниже отчётах пунктов сайта и фикс-планов отклонённых замечаний нет; в отчёте пункта 1 одно замечание отклонено.',
       events: [
+        {
+          id: 'review-1',
+          title: 'Пункт 1: одно замечание отклонено',
+          text: 'Ревьюер нашёл настоящий дефект в копии команды /code-review в снимке ядра. Замечание отклонили: снимок — копия рабочей команды, план запрещал переписывать её тексты, исправлять дефект нужно в рабочей команде.',
+          fragments: [
+            frag('build-review1-rejected', 'Отчёт ревью пункта 1: отклонённое замечание', rejected(1)),
+          ],
+        },
         {
           id: 'review-3',
           title: 'Пункт 3: два замечания, оба исправлены',
           text: 'Ревьюер нашёл, как утечка могла пройти мимо хука перед push и как проверка ссылок могла молча пропустить файл.',
           fragments: [
-            frag('code-review', 'Отчёт ревью пункта 3: замечания'),
-            frag('build-review3-total', 'Отчёт ревью пункта 3: итог'),
+            frag('code-review', 'Отчёт ревью пункта 3: замечания', rejected(0)),
+            frag('build-review3-total', 'Отчёт ревью пункта 3: итог', rejected(0)),
           ],
         },
         {
           id: 'review-4',
           title: 'Пункт 4: замечаний нет',
           text: 'Ревьюер дефектов в диффе не нашёл.',
-          fragments: [frag('build-review4-total', 'Отчёт ревью пункта 4: итог')],
+          fragments: [frag('build-review4-total', 'Отчёт ревью пункта 4: итог', rejected(0))],
         },
         {
           id: 'review-5',
           title: 'Пункт 5: замечаний нет',
           text: 'Ревьюер дефектов в диффе не нашёл.',
-          fragments: [frag('build-review5-total', 'Отчёт ревью пункта 5: итог')],
+          fragments: [frag('build-review5-total', 'Отчёт ревью пункта 5: итог', rejected(0))],
         },
       ],
     },
     {
       id: 'fixes',
       title: 'Исправления по итогам ручного тестирования',
-      lead: 'Тестировщик прошёл мануалы пунктов, его находки исправлены фикс-планами тем же путём: план, реализация, проверка, ревью. В истории git их коммиты помечены строкой Fix-for с именем плана-виновника.',
+      lead: 'Тестировщик прошёл мануалы пунктов. Правки кода по его находкам шли фикс-планами тем же путём: план, реализация, проверка, ревью. Часть правок документации — мануал, запись роадмапа — сделана отдельными коммитами без фикс-плана. Коммиты обоих видов помечены в истории git строкой Fix-for с именем плана-виновника.',
       events: [
         {
           id: 'fix-4',
@@ -193,8 +225,8 @@ export const BUILD_STORY: BuildStory = {
           text: 'Ссылки на строки документов, ряд «Вне цепочки», иллюстрация, заголовок и мануал.',
           fragments: [
             frag('build-fix4-problem', 'Фикс-план по пункту 4: контекст и проблема'),
-            frag('build-fix4-verify', 'Отчёт проверки фикса: итог'),
-            frag('build-fix4-review', 'Отчёт ревью фикса: итог'),
+            frag('build-fix4-verify', 'Отчёт проверки фикса: итог', PASSED),
+            frag('build-fix4-review', 'Отчёт ревью фикса: итог', rejected(0)),
           ],
         },
         {
@@ -203,8 +235,8 @@ export const BUILD_STORY: BuildStory = {
           text: 'Тексты «Устройства» и «Ограничений» и мануалы.',
           fragments: [
             frag('build-fix5-problem', 'Фикс-план по пункту 5: контекст и проблема'),
-            frag('build-fix5-verify', 'Отчёт проверки фикса: итог'),
-            frag('build-fix5-review', 'Отчёт ревью фикса: итог'),
+            frag('build-fix5-verify', 'Отчёт проверки фикса: итог', PASSED),
+            frag('build-fix5-review', 'Отчёт ревью фикса: итог', rejected(0)),
           ],
         },
       ],
@@ -212,14 +244,14 @@ export const BUILD_STORY: BuildStory = {
     {
       id: 'result',
       title: 'Итог',
-      lead: 'Пункты сайта приняты по отчётам проверки.',
+      lead: 'Показанные пункты сайта приняты по отчётам проверки; роадмап на этом не завершён.',
       events: [
         {
           id: 'accepted',
-          title: 'Сайт принят и публикуется',
-          text: 'Последний пункт сайта принят с отложенными ручными проверками. Публикация зафиксирована в «Фактах» роадмапа при пункте 3; дальше сайт публикуется на каждый push в main.',
+          title: 'Пункты сайта приняты, роадмап не завершён',
+          text: 'Пункт 3, пункт 4 и пункт 5 приняты по отчётам проверки, последний — с отложенными ручными проверками. Публикация зафиксирована в «Фактах» роадмапа при пункте 3; дальше сайт публикуется на каждый push в main. Финиш роадмапа — тег первой версии и доступ из РФ без VPN — относится к пункту 7, отметка о нём появится после него.',
           fragments: [
-            frag('build-verify5-result', 'Отчёт проверки пункта 5: итог'),
+            frag('build-verify5-result', 'Отчёт проверки пункта 5: итог', PASSED),
             frag('build-fact-published', 'Роадмап: запись «Фактов» о публикации'),
           ],
         },
@@ -236,7 +268,7 @@ export const BUILD_STORY: BuildStory = {
           text: 'Для пункта 1 пользователь скопировал ядро в чистое окружение и довёл /plan до файла плана без ошибок о недостающих файлах.',
           fragments: [
             frag('build-roadmap-clean-env', 'Роадмап: «Решения»'),
-            frag('build-verify1-clean-env', 'Отчёт проверки пункта 1: отложенный критерий'),
+            frag('build-verify1-clean-env', 'Отчёт проверки пункта 1: отложенный критерий', PASSED),
           ],
         },
         {
@@ -247,7 +279,7 @@ export const BUILD_STORY: BuildStory = {
             frag('build-roadmap-deferred', 'Роадмап: «Решения»'),
             frag('build-manual3-access', 'Мануал пункта 3: опубликованный сайт'),
             frag('build-manual4-dark', 'Мануал пункта 4: тёмная тема'),
-            frag('build-verify5-deferred', 'Отчёт проверки пункта 5: отложенный критерий'),
+            frag('build-verify5-deferred', 'Отчёт проверки пункта 5: отложенный критерий', PASSED),
           ],
         },
       ],

@@ -3,7 +3,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { expect, test } from 'vitest'
 import { REPO_URL, repoFileUrl } from '../repo.ts'
-import { BUILD_STORY, SELF_PLAN } from './build-story.ts'
+import { BUILD_STORY, PARTIAL_NOTE, SELF_PLAN } from './build-story.ts'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 const read = (path: string) => readFileSync(join(root, path), 'utf8')
@@ -105,19 +105,74 @@ test('собственный прогон — только ссылкой', () =
   }
 })
 
-test('итоги проверки — PASSED, PARTIAL показан', () => {
-  for (const path of paths) {
-    if (!path.endsWith('-verify.md')) continue
-    expect(lineAfter(path, '## Итог')).toMatch(/^PASSED/)
+const isReport = (path: string) => path.endsWith('-verify.md') || path.endsWith('-review.md')
+
+test('заявленный статус отчёта совпадает с итогом в файле', () => {
+  for (const fragment of fragments) {
+    if (fragment.path.endsWith('-verify.md')) {
+      const verdict = lineAfter(fragment.path, '## Итог').match(/^(PASSED|PARTIAL|FAILED)/)?.[1]
+      expect(verdict).toBeDefined()
+      expect(fragment.claim).toEqual({ verdict })
+    } else if (fragment.path.endsWith('-review.md')) {
+      const rejected = lineAfter(fragment.path, '## Итог').match(/отклонено: (\d+)/)?.[1]
+      expect(rejected).toBeDefined()
+      expect(fragment.claim).toEqual({ rejected: Number(rejected) })
+    } else {
+      expect(fragment.claim).toBeUndefined()
+    }
   }
-  const verifier = events.filter((event) => event.stage === 'verifier')
-  expect(verifier.some((e) => e.fragments.some((f) => f.text.includes('PARTIAL')))).toBe(true)
 })
 
-test('в отчётах ревью диффа нет отклонённых замечаний', () => {
-  for (const path of paths) {
-    if (!path.endsWith('-review.md')) continue
-    expect(lineAfter(path, '## Итог')).toContain('отклонено: 0')
+test('заголовки событий не расходятся с заявленным статусом', () => {
+  for (const event of events) {
+    if (event.stage !== 'verifier' && event.stage !== 'review') continue
+    const claims = event.fragments.flatMap((f) => (f.claim && isReport(f.path) ? [f.claim] : []))
+    expect(claims.length).toBeGreaterThan(0)
+    for (const claim of claims) {
+      if ('verdict' in claim) {
+        expect(event.title).toContain(claim.verdict)
+      } else if (claim.rejected > 0) {
+        expect(event.title).toContain('отклонен')
+      } else {
+        expect(event.title).not.toContain('отклонен')
+      }
+    }
+  }
+})
+
+test('итоговый статус в заголовке события — последний названный', () => {
+  for (const event of events) {
+    if (event.stage !== 'verifier') continue
+    const named = event.title.match(/PASSED|PARTIAL|FAILED/g) ?? []
+    for (const { claim } of event.fragments) {
+      if (claim && 'verdict' in claim) expect(named.at(-1)).toBe(claim.verdict)
+    }
+  }
+})
+
+test('PARTIAL и отклонённое замечание показаны', () => {
+  const verifier = events.filter((event) => event.stage === 'verifier')
+  expect(verifier.some((e) => e.fragments.some((f) => f.text.includes('PARTIAL')))).toBe(true)
+  expect(paths).toContain('docs/plans/2026-10-11_1303_public-showcase-1-harness-snapshot-review.md')
+  const review = events.filter((event) => event.stage === 'review')
+  expect(
+    review.some((e) =>
+      e.fragments.some((f) => f.claim !== undefined && 'rejected' in f.claim && f.claim.rejected > 0),
+    ),
+  ).toBe(true)
+})
+
+test('обрезанные фрагменты подписаны', () => {
+  expect(PARTIAL_NOTE.trim()).not.toBe('')
+  const partial = fragments.filter((fragment) => fragment.partial)
+  expect(partial.length).toBe(3)
+  for (const { path, fromLine, toLine } of partial) {
+    const lines = read(path).split('\n')
+    const omitted = [
+      ...lines.slice(toLine, toLine + 3),
+      ...lines.slice(Math.max(0, fromLine - 4), fromLine - 1),
+    ].join('\n')
+    expect(omitted).toMatch(/SDD|Spec-Driven/)
   }
 })
 
@@ -125,6 +180,7 @@ test('нет запрещённых названий', () => {
   const strings = [
     BUILD_STORY.title,
     BUILD_STORY.lead,
+    PARTIAL_NOTE,
     SELF_PLAN.label,
     SELF_PLAN.path,
     ...BUILD_STORY.stages.flatMap((stage) => [stage.id, stage.title, stage.lead]),
@@ -140,6 +196,7 @@ test('нет цифр в авторских текстах, кроме номе�
   const authored = [
     BUILD_STORY.title,
     BUILD_STORY.lead,
+    PARTIAL_NOTE,
     SELF_PLAN.label,
     ...BUILD_STORY.stages.flatMap((stage) => [stage.title, stage.lead]),
     ...events.flatMap((event) => [event.title, event.text]),

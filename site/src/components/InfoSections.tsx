@@ -1,4 +1,4 @@
-import { DEVICE, LIMITS, WHY, type Section } from '../sections/content.ts'
+import { DEVICE, LIMITS, WHY, WHY_BRIDGE, type Section } from '../sections/content.ts'
 
 function SectionItems({ section }: { section: Section }) {
   return (
@@ -19,6 +19,7 @@ export function WhySection() {
       <h2 id="why-title">{WHY.title}</h2>
       <p className="section-lead">{WHY.lead}</p>
       <SectionItems section={WHY} />
+      <p className="section-note">{WHY_BRIDGE}</p>
     </section>
   )
 }

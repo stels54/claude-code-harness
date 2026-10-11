@@ -11,7 +11,8 @@ const read = (path: string) => readFileSync(join(root, path), 'utf8')
 const events = BUILD_STORY.stages.flatMap((stage) =>
   stage.events.map((event) => ({ stage: stage.id, ...event })),
 )
-const fragments = events.flatMap((event) => event.fragments)
+const highlight = BUILD_STORY.highlight
+const fragments = [...highlight.fragments, ...events.flatMap((event) => event.fragments)]
 const paths = new Set(fragments.map((fragment) => fragment.path))
 
 const lineAfter = (path: string, heading: string) => {
@@ -20,6 +21,26 @@ const lineAfter = (path: string, heading: string) => {
   expect(at).toBeGreaterThanOrEqual(0)
   return lines.slice(at + 1).find((line) => line.trim() !== '') ?? ''
 }
+
+const REVIEW_3 = 'docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages-review.md'
+
+test('кейс одного ревью до хронологии', () => {
+  expect(highlight.title).toBe('Кейс: что нашло одно ревью')
+  for (const phrase of ['git archive', 'export-ignore', 'проверка ссылок', 'Оба замечания исправлены']) {
+    expect(highlight.text).toContain(phrase)
+  }
+  expect(highlight.fragments.map((f) => f.path)).toEqual([REVIEW_3, REVIEW_3])
+  const [table, recheck] = highlight.fragments
+  expect([table.fromLine, table.toLine]).toEqual([6, 9])
+  const rows = table.text.split('\n')
+  expect(rows.some((row) => row.startsWith('| 1 |'))).toBe(true)
+  expect(rows.some((row) => row.startsWith('| 2 |'))).toBe(true)
+  expect([recheck.fromLine, recheck.toLine]).toEqual([15, 22])
+  expect(recheck.text.startsWith('## Проверка после правок')).toBe(true)
+  for (const fragment of highlight.fragments) {
+    expect(fragment.claim).toEqual({ rejected: 0 })
+  }
+})
 
 test('стадии по порядку', () => {
   expect(BUILD_STORY.stages.map((stage) => stage.id)).toEqual([
@@ -184,6 +205,9 @@ test('нет запрещённых названий', () => {
     SELF_PLAN.label,
     SELF_PLAN.path,
     ...BUILD_STORY.stages.flatMap((stage) => [stage.id, stage.title, stage.lead]),
+    highlight.id,
+    highlight.title,
+    highlight.text,
     ...events.flatMap((event) => [event.id, event.title, event.text]),
     ...fragments.flatMap((fragment) => [fragment.label, fragment.path, fragment.text]),
   ]
@@ -199,6 +223,8 @@ test('нет цифр в авторских текстах, кроме номе�
     PARTIAL_NOTE,
     SELF_PLAN.label,
     ...BUILD_STORY.stages.flatMap((stage) => [stage.title, stage.lead]),
+    highlight.title,
+    highlight.text,
     ...events.flatMap((event) => [event.title, event.text]),
     ...fragments.map((fragment) => fragment.label),
   ]

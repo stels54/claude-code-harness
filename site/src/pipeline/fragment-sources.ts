@@ -159,6 +159,16 @@ export const FRAGMENT_SOURCES = {
     start: '## Итог',
     end: null,
   },
+  'build-review3-table': {
+    path: `${PLAN_3}-review.md`,
+    start: '| № |',
+    end: 'Ревьюер не смог',
+  },
+  'build-review3-recheck': {
+    path: `${PLAN_3}-review.md`,
+    start: '## Проверка после правок',
+    end: '## Ждёт решения',
+  },
   'build-review4-total': {
     path: `${PLAN_4}-review.md`,
     start: '## Итог',

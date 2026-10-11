@@ -4,7 +4,16 @@ import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'vitest'
 import { REPO_REF, REPO_URL } from '../repo.ts'
 import { PIPELINE_STEPS } from '../pipeline/steps.ts'
-import { AUTHOR, DEVICE, LIMITS, SNAPSHOT, WHY, type Section } from './content.ts'
+import {
+  AUTHOR,
+  DEVICE,
+  HERO,
+  LIMITS,
+  SNAPSHOT,
+  WHY,
+  WHY_BRIDGE,
+  type Section,
+} from './content.ts'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 
@@ -63,6 +72,32 @@ const DEVICE_TEXT: Record<string, string[]> = {
   'thin-layer': ['jq', 'terminal-notifier', 'notify-send', 'Codex CLI', 'Выбор автора'],
 }
 
+const HERO_FACTS: Record<string, [string, string][]> = {
+  'isolated-verifier': [
+    ['harness/commands/implement.md', 'В задание передай только путь'],
+    ['harness/agents/verifier.md', 'Контекста реализации у тебя'],
+  ],
+  'read-only-review': [
+    ['harness/commands/code-review.md', 'codex exec --sandbox read-only'],
+    ['harness/commands/plan.md', 'codex exec --sandbox read-only'],
+  ],
+  'human-stop': [
+    ['harness/commands/plan.md', 'жди ответа, не составляй план'],
+    ['harness/commands/code-review.md', '**STOP** — замечание верно'],
+  ],
+}
+
+const HERO_TEXT: Record<string, string[]> = {
+  'isolated-verifier': ['только путь к плану'],
+  'read-only-review': ['только чтения'],
+  'human-stop': ['останавливает', 'решения человека'],
+}
+
+const heroStrings = () => [
+  HERO.text,
+  ...HERO.items.flatMap((item) => [item.id, item.title, item.text]),
+]
+
 const sectionStrings = (section: Section) => [
   section.title,
   section.lead,
@@ -115,6 +150,54 @@ test('состав и порядок пунктов', () => {
   ])
 })
 
+test('первый экран: абзац о ценности', () => {
+  expect(HERO.text.trim()).not.toBe('')
+  for (const phrase of ['Claude Code', 'разделении реализации и независимой проверки', 'публичный снимок']) {
+    expect(HERO.text).toContain(phrase)
+  }
+  expect(HERO.text).not.toMatch(/реальных проектах/)
+})
+
+test('первый экран: три свойства', () => {
+  expect(HERO.items.map((item) => item.id)).toEqual([
+    'isolated-verifier',
+    'read-only-review',
+    'human-stop',
+  ])
+  for (const item of HERO.items) {
+    expect(item.title.trim()).not.toBe('')
+    expect(item.text.trim()).not.toBe('')
+  }
+  for (const [id, phrases] of Object.entries(HERO_TEXT)) {
+    const item = HERO.items.find((it) => it.id === id)
+    for (const phrase of phrases) {
+      expect(item?.text).toContain(phrase)
+    }
+  }
+})
+
+test('свойства первого экрана опираются на файлы harness/', () => {
+  expect(Object.keys(HERO_FACTS)).toEqual(HERO.items.map((item) => item.id))
+  for (const anchors of Object.values(HERO_FACTS)) {
+    for (const [path, phrase] of anchors) {
+      expect(readFileSync(join(root, path), 'utf8')).toContain(phrase)
+    }
+  }
+})
+
+test('первый экран: нет цифр', () => {
+  for (const value of heroStrings()) {
+    expect(value).not.toMatch(/[0-9]/)
+  }
+})
+
+test('«Зачем»: связка с постановкой задачи', () => {
+  for (const phrase of ['постановки задачи', 'формулирует инженер', 'критериями приёмки', 'проверку соответствия']) {
+    expect(WHY_BRIDGE).toContain(phrase)
+  }
+  expect(WHY_BRIDGE).not.toMatch(/[0-9]/)
+})
+
 test('каждый пункт «Устройства» привязан к «Фактам»', () => {
   expect(Object.keys(DEVICE_FACTS).sort()).toEqual([...ids(DEVICE)].sort())
   for (const anchors of Object.values(DEVICE_FACTS)) {
@@ -143,7 +226,9 @@ test('«Команды» определяют основную цепочку п
 })
 
 test('нет запрещённых названий', () => {
-  const all = [WHY, DEVICE, LIMITS].flatMap(sectionStrings).concat(authorStrings())
+  const all = [WHY, DEVICE, LIMITS]
+    .flatMap(sectionStrings)
+    .concat(authorStrings(), heroStrings(), [WHY_BRIDGE])
   for (const value of all) {
     expect(value).not.toMatch(/SDD|Spec-Driven/)
   }
@@ -151,7 +236,12 @@ test('нет запрещённых названий', () => {
 
 test('спецификация упомянута только как отсутствующая стадия', () => {
   const sections = [WHY, DEVICE, LIMITS]
-  for (const value of [...sections.map((s) => [s.title, s.lead]).flat(), ...authorStrings()]) {
+  for (const value of [
+    ...sections.map((s) => [s.title, s.lead]).flat(),
+    ...authorStrings(),
+    ...heroStrings(),
+    WHY_BRIDGE,
+  ]) {
     expect(value).not.toMatch(/спецификац/i)
   }
   for (const section of sections) {

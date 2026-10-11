@@ -29,6 +29,23 @@
   color: var(--ink-soft);
 }
 
+.hero-value {
+  margin: 0 auto 1.5rem;
+  max-width: 36em;
+}
+
+.hero-props {
+  margin: 0 0 1.75rem;
+  text-align: left;
+}
+
+.hero-props strong {
+  display: block;
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: var(--teal);
+}
+
 .hero-art {
   display: block;
   max-width: 44rem;
@@ -63,6 +80,12 @@
   color: var(--ink-soft);
 }
 
+.section-note {
+  margin: 1.5rem 0 0;
+  max-width: 40em;
+  color: var(--ink-soft);
+}
+
 .info-items {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(min(100%, 17rem), 1fr));
@@ -89,6 +112,31 @@
 .info-item p {
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.build-highlight {
+  padding: 0.9rem 1.1rem;
+  border: 1px solid var(--line-faint);
+  border-left: 2px solid var(--ochre);
+  border-radius: 0 12px 12px 0;
+  overflow-wrap: anywhere;
+}
+
+.build-highlight h3 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: var(--teal);
+}
+
+.build-highlight p {
+  margin: 0;
+}
+
+.build-highlight summary {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--teal);
+  cursor: pointer;
 }
 
 .build-stage {

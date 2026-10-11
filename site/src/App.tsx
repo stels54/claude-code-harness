@@ -5,6 +5,7 @@ import { DeviceSection, LimitsSection, WhySection } from './components/InfoSecti
 import PipelineScheme from './components/PipelineScheme.tsx'
 import SiteFooter from './components/SiteFooter.tsx'
 import { REPO_URL, repoFileUrl } from './repo.ts'
+import { HERO } from './sections/content.ts'
 
 function App() {
   return (
@@ -18,6 +19,15 @@ function App() {
           <p className="hero-lead">
             план → реализация → изолированная проверка → ревью другой моделью
           </p>
+          <p className="hero-value">{HERO.text}</p>
+          <ul className="info-items hero-props">
+            {HERO.items.map((item) => (
+              <li key={item.id} className="info-item">
+                <strong>{item.title}</strong>
+                <p>{item.text}</p>
+              </li>
+            ))}
+          </ul>
           <HeroArt />
           <ul className="hero-links">
             <li>

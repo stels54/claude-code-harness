@@ -35,6 +35,13 @@ function BuildStory() {
     <section id="build" className="section build-story" aria-labelledby="build-title">
       <h2 id="build-title">{BUILD_STORY.title}</h2>
       <p className="section-lead">{BUILD_STORY.lead}</p>
+      <div className="build-highlight">
+        <h3>{BUILD_STORY.highlight.title}</h3>
+        <p>{BUILD_STORY.highlight.text}</p>
+        {BUILD_STORY.highlight.fragments.map((fragment) => (
+          <StoryFragment key={`${fragment.path}:${fragment.fromLine}`} fragment={fragment} />
+        ))}
+      </div>
       {BUILD_STORY.stages.map((stage) => (
         <div key={stage.id} className="build-stage">
           <h3>{stage.title}</h3>

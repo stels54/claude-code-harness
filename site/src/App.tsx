@@ -1,4 +1,5 @@
 import './App.css'
+import BuildStory from './components/BuildStory.tsx'
 import HeroArt from './components/HeroArt.tsx'
 import { DeviceSection, LimitsSection, WhySection } from './components/InfoSections.tsx'
 import PipelineScheme from './components/PipelineScheme.tsx'
@@ -38,10 +39,12 @@ function App() {
               <a href="#limits">Ограничения</a>
             </li>
             <li>
+              <a href="#build">Как собран этот сайт</a>
+            </li>
+            <li>
               <a href="#author">Автор</a>
             </li>
           </ul>
-          <p className="hero-note">Раздел «Как собран этот сайт» в работе.</p>
         </header>
 
         <WhySection />
@@ -58,6 +61,7 @@ function App() {
 
         <DeviceSection />
         <LimitsSection />
+        <BuildStory />
       </main>
       <SiteFooter />
     </>

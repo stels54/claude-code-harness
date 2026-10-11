@@ -46,12 +46,6 @@
   list-style: none;
 }
 
-.hero-note {
-  margin: 0;
-  font-size: 0.85rem;
-  color: var(--ink-soft);
-}
-
 .section {
   margin-top: 3.5rem;
   padding-top: 2rem;
@@ -95,6 +89,43 @@
 .info-item p {
   margin: 0;
   overflow-wrap: anywhere;
+}
+
+.build-stage {
+  margin-top: 2rem;
+}
+
+.build-stage h3 {
+  margin: 0 0 0.4rem;
+  font-size: clamp(1.05rem, 3.5vw, 1.3rem);
+}
+
+.build-stage-lead {
+  margin: 0 0 1rem;
+  max-width: 40em;
+  color: var(--ink-soft);
+}
+
+.build-events {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.build-events h4 {
+  margin: 0 0 0.4rem;
+  font-size: 0.95rem;
+  color: var(--teal);
+}
+
+.build-events summary {
+  margin-top: 0.35rem;
+  font-size: 0.85rem;
+  color: var(--teal);
+  cursor: pointer;
+}
+
+.build-self {
+  margin: 2rem 0 0;
+  color: var(--ink-soft);
 }
 
 .site-footer {

@@ -67,16 +67,6 @@
    По плану и отчёту проверки пишет мануал ручного тестирования в
    `docs/manual/`.
 
-Вне основной цепочки:
-- **`/verify`** — [`harness/commands/verify.md`](harness/commands/verify.md):
-  та же проверка по плану, но в текущей сессии, без изоляции от контекста
-  реализации; пишет тот же отчёт `-verify.md`. Нужна, когда проверку надо
-  повторить руками, в обычном цикле её заменяет агент `verifier`.
-- **`/plan-fix`** — [`harness/commands/plan-fix.md`](harness/commands/plan-fix.md):
-  короткий план исправления бага, до 5 шагов.
-- **`/fix-tests`** — [`harness/commands/fix-tests.md`](harness/commands/fix-tests.md):
-  починка упавших тестов по выводу ошибок; сначала чинится код, а не тест.
-
 Ревью другой моделью устроено одинаково в `/plan` и `/code-review`: Codex
 запускается командой `codex exec --sandbox read-only`, без контекста
 обсуждения; до и после фиксируется `git status --short`, чтобы ревьюер ничего
@@ -129,7 +119,8 @@ chmod +x ~/.claude/hooks/notify.sh ~/.claude/hooks/pipeline-clock.sh
 
 ## Что не вошло
 
-Не публикуются: команды `from-linear`, `review`, `git-report` и скилл `lessons`.
+Не публикуются: команды `from-linear`, `review`, `git-report`, `verify`,
+`plan-fix`, `fix-tests` и скилл `lessons`.
 
 ## Ограничения
 

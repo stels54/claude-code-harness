@@ -8,7 +8,6 @@ export interface StepFragment extends Fragment {
 
 export interface PipelineStep {
   id: string
-  kind: 'chain' | 'aside'
   title: string
   optional: boolean
   summary: string
@@ -23,7 +22,6 @@ export interface PipelineStep {
 export const PIPELINE_STEPS: PipelineStep[] = [
   {
     id: 'roadmap',
-    kind: 'chain',
     title: '/roadmap',
     optional: true,
     summary:
@@ -39,7 +37,6 @@ export const PIPELINE_STEPS: PipelineStep[] = [
   },
   {
     id: 'plan',
-    kind: 'chain',
     title: '/plan',
     optional: false,
     summary:
@@ -56,7 +53,6 @@ export const PIPELINE_STEPS: PipelineStep[] = [
   },
   {
     id: 'implement',
-    kind: 'chain',
     title: '/implement',
     optional: false,
     summary:
@@ -75,7 +71,6 @@ export const PIPELINE_STEPS: PipelineStep[] = [
   },
   {
     id: 'verifier',
-    kind: 'chain',
     title: 'verifier',
     optional: false,
     summary:
@@ -92,7 +87,6 @@ export const PIPELINE_STEPS: PipelineStep[] = [
   },
   {
     id: 'code-review',
-    kind: 'chain',
     title: '/code-review',
     optional: false,
     summary:
@@ -111,7 +105,6 @@ export const PIPELINE_STEPS: PipelineStep[] = [
   },
   {
     id: 'manual',
-    kind: 'chain',
     title: '/manual',
     optional: false,
     summary: 'Генерирует мануал ручного тестирования по плану и верификации.',
@@ -121,42 +114,5 @@ export const PIPELINE_STEPS: PipelineStep[] = [
     human: 'Нет плана и верификации — команда спрашивает пути.',
     file: 'harness/commands/manual.md',
     fragment: { ...fragments.manual, label: 'Сценарий из мануала пункта 3' },
-  },
-  {
-    id: 'verify',
-    kind: 'aside',
-    title: '/verify',
-    optional: false,
-    summary: 'Верификация реализации плана командой, тот же отчёт, что у агента verifier.',
-    input: 'Путь к плану; нет — STOP.',
-    output:
-      'docs/plans/<план>-verify.md: статус каждого шага, вывод команд проверки, браузерная приёмка, критерии приёмки, итог PASSED/FAILED/PARTIAL.',
-    human: 'DEFERRED (проверка невозможна в окружении) без подтверждения — коммита нет.',
-    file: 'harness/commands/verify.md',
-  },
-  {
-    id: 'plan-fix',
-    kind: 'aside',
-    title: '/plan-fix',
-    optional: false,
-    summary: 'Краткий план исправления бага или небольшой правки.',
-    input: 'Описание бага или небольшой правки.',
-    output:
-      'docs/plans/<префикс>_fix-<slug>.md: до 5 шагов, один шаг — один файл, разделы «Как воспроизвести» и «Как проверить фикс».',
-    human: 'Неочевидная причина — гипотеза и подтверждение.',
-    file: 'harness/commands/plan-fix.md',
-  },
-  {
-    id: 'fix-tests',
-    kind: 'aside',
-    title: '/fix-tests',
-    optional: false,
-    summary: 'Чинит упавшие тесты по переданному выводу ошибок.',
-    input: 'Имя упавшего теста, вывод ошибок или stacktrace; пустой — STOP.',
-    output:
-      'Исправления (сначала код, не тест) и таблица «тест → причина → что исправлено» с итоговым прогоном.',
-    human:
-      'Неочевидная причина — гипотеза и подтверждение; команда прогона не найдена — спросить.',
-    file: 'harness/commands/fix-tests.md',
   },
 ]

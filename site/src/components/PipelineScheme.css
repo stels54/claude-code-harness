@@ -1,5 +1,4 @@
-.scheme-chain,
-.scheme-aside {
+.scheme-chain {
   list-style: none;
   margin: 0;
   padding: 0;
@@ -18,17 +17,6 @@
   bottom: 1.4rem;
   left: 1.45rem;
   border-left: 1px solid var(--line);
-}
-
-.scheme-aside {
-  display: grid;
-  gap: 0.75rem;
-}
-
-.scheme-aside-title {
-  margin: 2rem 0 0.75rem;
-  font-size: 0.95rem;
-  color: var(--ink-soft);
 }
 
 .step {
@@ -52,11 +40,6 @@
   transition:
     background-color 0.2s,
     border-color 0.2s;
-}
-
-.step-aside .step-button {
-  padding-left: 0.9rem;
-  border-style: dashed;
 }
 
 .step-button:hover,
@@ -99,10 +82,6 @@
   border-left: 2px solid var(--sunset);
   border-radius: 0 12px 12px 0;
   background: color-mix(in srgb, var(--paper-deep) 55%, transparent);
-}
-
-.step-aside .step-panel {
-  margin-left: 0;
 }
 
 .step-details > :first-child {
@@ -165,24 +144,6 @@
 
   .step-facts dd {
     margin: 0;
-  }
-
-  .scheme-aside {
-    grid-template-columns: repeat(3, minmax(0, 1fr));
-    align-items: start;
-  }
-
-  .scheme-aside > .step {
-    display: contents;
-  }
-
-  .step-aside .step-button {
-    grid-row: 1;
-  }
-
-  .step-aside .step-panel {
-    grid-row: 2;
-    grid-column: 1 / -1;
   }
 }
 

@@ -6,11 +6,8 @@ import { PIPELINE_STEPS } from './steps.ts'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 
-const ids = (kind: 'chain' | 'aside') =>
-  PIPELINE_STEPS.filter((step) => step.kind === kind).map((step) => step.id)
-
 test('состав и порядок шагов', () => {
-  expect(ids('chain')).toEqual([
+  expect(PIPELINE_STEPS.map((step) => step.id)).toEqual([
     'roadmap',
     'plan',
     'implement',
@@ -18,8 +15,7 @@ test('состав и порядок шагов', () => {
     'code-review',
     'manual',
   ])
-  expect(ids('aside')).toEqual(['verify', 'plan-fix', 'fix-tests'])
-  expect(PIPELINE_STEPS).toHaveLength(9)
+  expect(PIPELINE_STEPS).toHaveLength(6)
 })
 
 describe.each(PIPELINE_STEPS.map((step) => [step.id, step] as const))(
@@ -40,8 +36,8 @@ describe.each(PIPELINE_STEPS.map((step) => [step.id, step] as const))(
       expect(step.optional).toBe(id === 'roadmap')
     })
 
-    test('фрагмент есть только у шагов цепочки', () => {
-      expect(step.fragment !== undefined).toBe(step.kind === 'chain')
+    test('фрагмент есть у каждого шага', () => {
+      expect(step.fragment !== undefined).toBe(true)
     })
 
     test('фрагмент совпадает со строками исходного файла', () => {

@@ -136,11 +136,10 @@ test('пункты «Устройства» называют свои факты
 
 test('«Команды» определяют основную цепочку по схеме', () => {
   const text = DEVICE.items.find((item) => item.id === 'commands')?.text
-  const chain = PIPELINE_STEPS.filter((step) => step.kind === 'chain')
-  const aside = PIPELINE_STEPS.filter((step) => step.kind === 'aside')
-  for (const step of [chain[0], chain[chain.length - 1], ...aside]) {
+  for (const step of [PIPELINE_STEPS[0], PIPELINE_STEPS[PIPELINE_STEPS.length - 1]]) {
     expect(text).toContain(step.title)
   }
+  expect(text).not.toMatch(/\/verify|\/plan-fix|\/fix-tests/)
 })
 
 test('нет запрещённых названий', () => {

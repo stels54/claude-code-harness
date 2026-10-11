@@ -61,7 +61,7 @@ function StepDetails({ step }: { step: PipelineStep }) {
 function Step({ step, index, open, onToggle }: StepProps) {
   const panelId = `step-panel-${step.id}`
   return (
-    <li className={`step step-${step.kind}${open ? ' is-open' : ''}`}>
+    <li className={`step step-chain${open ? ' is-open' : ''}`}>
       <button
         type="button"
         className="step-button"
@@ -83,13 +83,11 @@ function Step({ step, index, open, onToggle }: StepProps) {
 function PipelineScheme() {
   const [openId, setOpenId] = useState<string | null>(null)
   const toggle = (id: string) => setOpenId((current) => (current === id ? null : id))
-  const chain = PIPELINE_STEPS.filter((step) => step.kind === 'chain')
-  const aside = PIPELINE_STEPS.filter((step) => step.kind === 'aside')
 
   return (
     <div className="scheme">
       <ol className="scheme-chain">
-        {chain.map((step, i) => (
+        {PIPELINE_STEPS.map((step, i) => (
           <Step
             key={step.id}
             step={step}
@@ -99,17 +97,6 @@ function PipelineScheme() {
           />
         ))}
       </ol>
-      <h3 className="scheme-aside-title">Вне цепочки</h3>
-      <ul className="scheme-aside">
-        {aside.map((step) => (
-          <Step
-            key={step.id}
-            step={step}
-            open={openId === step.id}
-            onToggle={() => toggle(step.id)}
-          />
-        ))}
-      </ul>
     </div>
   )
 }

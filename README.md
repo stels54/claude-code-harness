@@ -1,5 +1,8 @@
 # claude-code-harness
 
+Надстройка над Claude Code для управляемой разработки: план, реализация,
+изолированная проверка агентом и ревью другой моделью.
+
 ## Что это и для кого
 
 Набор команд [Claude Code](https://docs.anthropic.com/en/docs/claude-code) для

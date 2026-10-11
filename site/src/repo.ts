@@ -1,5 +1,5 @@
 export const REPO_URL = 'https://github.com/stels54/claude-code-harness'
-export const REPO_REF = 'main'
+export const REPO_REF = 'v1'
 
 export interface LineRange {
   from: number

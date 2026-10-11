@@ -1,17 +1,15 @@
 import { expect, test } from 'vitest'
 import { REPO_REF, REPO_URL, repoFileUrl } from './repo.ts'
 
-const blob = 'https://github.com/stels54/claude-code-harness/blob/main'
+const blob = 'https://github.com/stels54/claude-code-harness/blob/v1'
 
 test('база ссылок на репозиторий', () => {
   expect(REPO_URL).toBe('https://github.com/stels54/claude-code-harness')
-  expect(REPO_REF).toBe('main')
+  expect(REPO_REF).toBe('v1')
 })
 
 test('ссылка на файл без строк', () => {
-  expect(repoFileUrl('harness/commands/plan.md')).toBe(
-    'https://github.com/stels54/claude-code-harness/blob/main/harness/commands/plan.md',
-  )
+  expect(repoFileUrl('harness/commands/plan.md')).toBe(`${blob}/harness/commands/plan.md`)
 })
 
 test('ссылка на диапазон строк', () => {

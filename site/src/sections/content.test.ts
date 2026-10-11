@@ -2,9 +2,9 @@ import { readFileSync } from 'node:fs'
 import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'vitest'
-import { REPO_URL } from '../repo.ts'
+import { REPO_REF, REPO_URL } from '../repo.ts'
 import { PIPELINE_STEPS } from '../pipeline/steps.ts'
-import { AUTHOR, DEVICE, LIMITS, WHY, type Section } from './content.ts'
+import { AUTHOR, DEVICE, LIMITS, SNAPSHOT, WHY, type Section } from './content.ts'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
 
@@ -178,4 +178,15 @@ test('подвал «Автор»', () => {
   for (const value of authorStrings()) {
     expect(value).not.toMatch(/hh\./)
   }
+})
+
+test('снимок в подвале', () => {
+  const readme = readFileSync(join(root, 'README.md'), 'utf8')
+  const date = readme.match(/^- Дата снимка: (\d{4}-\d{2}-\d{2})\.$/m)?.[1]
+  expect(date).toBeDefined()
+  expect(SNAPSHOT.date).toBe(date)
+  expect(SNAPSHOT.ref).toBe(REPO_REF)
+  expect(SNAPSHOT.href).toBe(`${REPO_URL}/tree/v1`)
+  expect(SNAPSHOT.label.trim()).not.toBe('')
+  expect(SNAPSHOT.label).not.toMatch(/SDD|Spec-Driven/)
 })

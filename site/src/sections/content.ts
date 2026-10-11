@@ -1,4 +1,4 @@
-import { REPO_URL } from '../repo.ts'
+import { REPO_REF, REPO_URL } from '../repo.ts'
 
 export interface SectionItem {
   id: string
@@ -112,4 +112,11 @@ export const AUTHOR: { name: string; links: AuthorLink[] } = {
     { label: 'LinkedIn', href: 'https://www.linkedin.com/in/kirill-zhirkin/' },
     { label: 'Репозиторий конвейера', href: REPO_URL },
   ],
+}
+
+export const SNAPSHOT: { label: string; date: string; ref: string; href: string } = {
+  label: 'Снимок ядра конвейера',
+  date: '2026-10-11',
+  ref: REPO_REF,
+  href: `${REPO_URL}/tree/${REPO_REF}`,
 }

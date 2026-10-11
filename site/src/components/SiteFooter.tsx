@@ -1,4 +1,4 @@
-import { AUTHOR } from '../sections/content.ts'
+import { AUTHOR, SNAPSHOT } from '../sections/content.ts'
 
 function SiteFooter() {
   return (
@@ -14,6 +14,12 @@ function SiteFooter() {
           </li>
         ))}
       </ul>
+      <p>
+        {SNAPSHOT.label} от {SNAPSHOT.date},{' '}
+        <a href={SNAPSHOT.href} rel="noreferrer">
+          тег {SNAPSHOT.ref}
+        </a>
+      </p>
     </footer>
   )
 }

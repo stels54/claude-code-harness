@@ -303,7 +303,7 @@ site/src/pipeline/fragment-sources.ts`), `build` → exit 0.
 ```bash
 npm --prefix site run typecheck   # exit 0
 npm --prefix site run lint        # exit 0
-npm --prefix site test            # Test Files 5 passed, Tests 70 passed
+npm --prefix site test            # Test Files 6 passed, Tests 84 passed
 npm --prefix site run build       # exit 0
 scripts/check-leaks.sh            # check-leaks: 0 совпадений
 scripts/check-harness-refs.sh     # check-harness-refs: 0 нарушений
@@ -314,7 +314,8 @@ scripts/check-links.sh            # check-links: 0 нарушений
 (база ссылок), `site/src/pipeline/fragment.test.ts` (вырезание по
 маркерам), `site/fragments-plugin.test.ts` (плагин),
 `site/src/pipeline/steps.test.ts` (данные схемы: состав и порядок шагов,
-непустые поля, файл в `harness/`, фрагмент совпадает со строками файла).
+непустые поля, файл в `harness/`, фрагмент совпадает со строками файла),
+`site/src/sections/content.test.ts` (тексты разделов, пункт 5).
 
 ## 9. Cleanup
 

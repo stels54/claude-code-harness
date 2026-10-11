@@ -3,6 +3,7 @@ import { join } from 'node:path'
 import { fileURLToPath } from 'node:url'
 import { describe, expect, test } from 'vitest'
 import { REPO_URL } from '../repo.ts'
+import { PIPELINE_STEPS } from '../pipeline/steps.ts'
 import { AUTHOR, DEVICE, LIMITS, WHY, type Section } from './content.ts'
 
 const root = fileURLToPath(new URL('../../../', import.meta.url))
@@ -24,6 +25,7 @@ const DEVICE_FACTS: Record<string, string[]> = {
     'кода не пишет',
     'критичные вопросы до плана',
     'коммит при PASSED предлагается, а не делается',
+    'пустое → STOP',
   ],
   verifier: [
     'контекста реализации у него нет намеренно',
@@ -35,16 +37,30 @@ const DEVICE_FACTS: Record<string, string[]> = {
     'codex exec --sandbox read-only',
     'ревьюер без контекста обсуждения и файлов не меняет',
     'каждое замечание проверяется по коду, один цикл без повторного ревью',
+    'пропуск флагом `--no-codex`',
+    'нет бинаря `codex` → ⏭️',
   ],
   hooks: [
     'подключает `notify.sh` на `Notification` и `Stop`',
     'пишет jsonl в `$HOME/.claude/pipeline-clock.jsonl`',
     'Оба при любом сбое завершаются с кодом 0 и работу не блокируют',
+    'требует `jq`',
+    'в строку попадают время, событие, id сессии, рабочий каталог и до 200 символов первой строки запроса пользователя или задания субагенту',
   ],
   'thin-layer': [
     '`harness/settings-hooks.json` (только ключ `hooks`)',
     '`harness/CLAUDE.md` — часть ядра, а не пример',
+    'требует `jq`',
+    '`notify.sh` — уведомление через `terminal-notifier` или `notify-send`',
+    'Ревью другой моделью — Codex CLI',
   ],
+}
+
+const DEVICE_TEXT: Record<string, string[]> = {
+  commands: ['STOP'],
+  'cross-review': ['--no-codex', '⏭️'],
+  hooks: ['jq', 'id сессии', 'рабочий каталог', 'двухсот символов', 'задания субагенту'],
+  'thin-layer': ['jq', 'terminal-notifier', 'notify-send', 'Codex CLI', 'Выбор автора'],
 }
 
 const sectionStrings = (section: Section) => [
@@ -105,6 +121,25 @@ test('каждый пункт «Устройства» привязан к «Ф�
     for (const anchor of anchors) {
       expect(facts).toContain(anchor)
     }
+  }
+})
+
+test('пункты «Устройства» называют свои факты', () => {
+  for (const [id, phrases] of Object.entries(DEVICE_TEXT)) {
+    expect(ids(DEVICE)).toContain(id)
+    const item = DEVICE.items.find((it) => it.id === id)
+    for (const phrase of phrases) {
+      expect(item?.text).toContain(phrase)
+    }
+  }
+})
+
+test('«Команды» определяют основную цепочку по схеме', () => {
+  const text = DEVICE.items.find((item) => item.id === 'commands')?.text
+  const chain = PIPELINE_STEPS.filter((step) => step.kind === 'chain')
+  const aside = PIPELINE_STEPS.filter((step) => step.kind === 'aside')
+  for (const step of [chain[0], chain[chain.length - 1], ...aside]) {
+    expect(text).toContain(step.title)
   }
 })
 

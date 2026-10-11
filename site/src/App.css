@@ -1,0 +1,16 @@
+.stub {
+  box-sizing: border-box;
+  max-width: 40rem;
+  margin: 0 auto;
+  padding: 3rem 1rem;
+}
+
+.stub h1 {
+  font-size: 2rem;
+  line-height: 1.2;
+}
+
+.stub a {
+  color: inherit;
+  overflow-wrap: anywhere;
+}

@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+# pre-push: проверка запрещённых строк в вершине каждой пушимой ветки.
+# Установка: git config core.hooksPath scripts/hooks
+# Выход: код scripts/check-leaks.sh; 2 — ошибка подготовки дерева.
+set -u
+
+repo="$(git rev-parse --show-toplevel)" || exit 2
+check="$repo/scripts/check-leaks.sh"
+zero="0000000000000000000000000000000000000000"
+
+fail() {
+  echo "pre-push: $1, push отменён" >&2
+  exit 2
+}
+
+while read -r local_ref local_sha remote_ref remote_sha; do
+  [ -n "${local_sha:-}" ] || continue
+  [ "$local_sha" = "$zero" ] && continue
+
+  tree="$(mktemp -d)" || fail "не удалось создать временный каталог"
+  trap 'rm -rf "$tree"' EXIT
+
+  git -C "$repo" cat-file -e "$local_sha^{commit}" 2>/dev/null ||
+    fail "нет коммита $local_sha ($local_ref)"
+  mkdir "$tree/root" || fail "не удалось создать каталог выгрузки"
+  GIT_INDEX_FILE="$tree/index" git -C "$repo" read-tree "$local_sha" ||
+    fail "git read-tree $local_sha"
+  GIT_INDEX_FILE="$tree/index" git -C "$repo" checkout-index -a -f \
+    --prefix="$tree/root/" || fail "выгрузка дерева $local_sha"
+  git -C "$tree/root" init -q || fail "git init"
+  git -C "$tree/root" add -A -f . || fail "git add"
+
+  echo "pre-push: проверка $local_ref ($local_sha)" >&2
+  "$check" "$tree/root" >&2
+  code=$?
+  rm -rf "$tree"
+  trap - EXIT
+  if [ "$code" -ne 0 ]; then
+    echo "pre-push: check-leaks вернул $code для $local_ref, push отменён" >&2
+    exit "$code"
+  fi
+done
+
+exit 0

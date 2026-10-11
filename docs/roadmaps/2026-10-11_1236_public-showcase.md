@@ -60,8 +60,8 @@
   интернет (проверка руками).
 - **dependsOn**: 1 — проверка на утечки должна существовать до первого push
   публичного репозитория.
-- **Статус**: ⬜
-- **План**: —
+- **Статус**: ⏸️
+- **План**: docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages.md
 
 ### Пункт 4 — Визуальный стиль и кликабельная схема конвейера
 - **Цель**: самобытный дизайн сайта (не шаблон «портфолио разработчика»,
@@ -218,6 +218,24 @@
   «Именование документов», «Коммиты» (trailer `Plan:`), «Вопросы ко мне»
   (`grep -n 'CLAUDE.md' harness/commands/*.md harness/agents/*.md`), поэтому
   `harness/CLAUDE.md` — часть ядра, а не пример → затрагивает: 5
+- [2026-10-11, пункт 3] Сайт: `site/` из `create-vite@9.2.1 --template
+  react-ts --eslint` (без флага шаблон ставит oxlint), npm, lock
+  `site/package-lock.json`; команды проверки — корневой `CLAUDE.md`
+  (`npm --prefix site run typecheck|lint|build`, `npm --prefix site test`).
+  Vitest подменяет `base` на `/`: `import.meta.env.BASE_URL` в тестах всегда
+  `/`, адрес проверяется импортом `vite.config.ts` в
+  `site/vite.config.test.ts`; тест-файлы вне `src/` надо добавлять в
+  `include` `site/tsconfig.node.json` → затрагивает: 4, 5
+- [2026-10-11, пункт 3] `scripts/check-links.sh` видит только литеральные
+  URL `https://github.com/stels54/claude-code-harness/(blob|tree)/<ref>/<путь>`
+  и литералы `href="#…"`/`id="…"` в `site/src`; URL, собранные
+  конкатенацией или шаблонной строкой (как ссылка на README в заглушке
+  `site/src/App.tsx`), и вычисляемые якоря он не проверяет. `blob` на каталог
+  — нарушение (нужен `tree`); ссылки в inline-коде и fenced-блоках `*.md`
+  пропускаются → затрагивает: 4, 5, 6, 7
+- [2026-10-11, пункт 3] Окно Chrome через расширение не сужается до 360px
+  (минимум около 606px): ширину 360px проверяли в iframe шириной 360px
+  (`scrollWidth <= innerWidth` внутри iframe) → затрагивает: 4, 5
 
 ## Решения
 - Где создавать репозиторий и роадмап → репозиторий `claude-code-harness`

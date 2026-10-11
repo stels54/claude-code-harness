@@ -128,6 +128,17 @@ chmod +x ~/.claude/hooks/notify.sh ~/.claude/hooks/pipeline-clock.sh
 - Хуки вызываются по путям `$HOME/.claude/hooks/…` и работают только при
   установке в `~/.claude`.
 
+## Работа с репозиторием
+
+- Исходники сайта — в `site/` (Vite + React + TypeScript, npm).
+- Команды проверки сайта и репозитория перечислены в [`CLAUDE.md`](CLAUDE.md).
+- Перед первым push поставьте хук: `git config core.hooksPath scripts/hooks`.
+  Он запускает `scripts/check-leaks.sh` по пушимым коммитам. Нужен непустой
+  список запрещённых строк в `~/.config/harness-publish/denylist.txt` или по
+  пути из `HARNESS_DENYLIST`, без него push отменяется с кодом 2.
+- Сайт собирается и публикуется GitHub Actions
+  (`.github/workflows/pages.yml`) на каждый push в `main`.
+
 ## Дата снимка и сайт
 
 - Дата снимка: 2026-10-11.

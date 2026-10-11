@@ -1,0 +1,231 @@
+.scheme-chain,
+.scheme-aside {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.scheme-chain {
+  position: relative;
+  display: grid;
+  gap: 0.75rem;
+}
+
+.scheme-chain::before {
+  content: '';
+  position: absolute;
+  top: 1.4rem;
+  bottom: 1.4rem;
+  left: 1.45rem;
+  border-left: 1px solid var(--line);
+}
+
+.scheme-aside {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.scheme-aside-title {
+  margin: 2rem 0 0.75rem;
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+}
+
+.step {
+  position: relative;
+  min-width: 0;
+}
+
+.step-button {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  padding: 0.6rem 0.9rem 0.6rem 0.5rem;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 600 1rem/1.3 var(--font-display);
+  text-align: left;
+  cursor: pointer;
+  transition:
+    background-color 0.2s,
+    border-color 0.2s;
+}
+
+.step-aside .step-button {
+  padding-left: 0.9rem;
+  border-style: dashed;
+}
+
+.step-button:hover,
+.step.is-open .step-button {
+  background: var(--paper-deep);
+  border-color: var(--sunset);
+}
+
+.step-index {
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 1.9rem;
+  height: 1.9rem;
+  border: 1px solid var(--ochre);
+  border-radius: 50%;
+  background: var(--paper);
+  font-size: 0.8rem;
+  color: var(--sunset);
+}
+
+.step-title {
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.step-tag {
+  margin-left: auto;
+  padding: 0.1rem 0.5rem;
+  border: 1px solid var(--teal);
+  border-radius: 999px;
+  font: 0.7rem/1.4 var(--font-mono);
+  color: var(--teal);
+}
+
+.step-panel {
+  margin: 0.5rem 0 0.5rem 2.9rem;
+  padding: 1rem 1.1rem;
+  border: 1px solid var(--line-faint);
+  border-left: 2px solid var(--sunset);
+  border-radius: 0 12px 12px 0;
+  background: color-mix(in srgb, var(--paper-deep) 55%, transparent);
+}
+
+.step-aside .step-panel {
+  margin-left: 0;
+}
+
+.step-details > :first-child {
+  margin-top: 0;
+}
+
+.step-facts {
+  display: grid;
+  gap: 0.15rem 1rem;
+  margin: 0.75rem 0;
+}
+
+.step-facts dt {
+  font: 600 0.75rem/1.6 var(--font-display);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: var(--violet);
+}
+
+.step-facts dd {
+  margin: 0 0 0.5rem;
+  overflow-wrap: anywhere;
+}
+
+.step-link,
+.step-nodoc {
+  margin: 0.5rem 0;
+}
+
+.step-nodoc {
+  color: var(--ink-soft);
+  font-style: italic;
+}
+
+.step-fragment {
+  margin: 1rem 0 0;
+}
+
+.step-fragment figcaption {
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+.step-fragment pre {
+  margin: 0.5rem 0 0;
+  padding: 0.75rem 0.9rem;
+  border: 1px solid var(--line-faint);
+  border-radius: 8px;
+  background: var(--paper);
+  font-size: 0.75rem;
+  line-height: 1.55;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+}
+
+@media (min-width: 720px) {
+  .step-facts {
+    grid-template-columns: max-content 1fr;
+  }
+
+  .step-facts dd {
+    margin: 0;
+  }
+
+  .scheme-aside {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    align-items: start;
+  }
+
+  .step-aside.is-open {
+    grid-column: 1 / -1;
+    order: 1;
+  }
+}
+
+@media (min-width: 960px) {
+  .scheme-chain {
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    column-gap: 0.75rem;
+    row-gap: 1rem;
+  }
+
+  .scheme-chain::before {
+    top: 1.55rem;
+    bottom: auto;
+    left: 1rem;
+    right: 1rem;
+    border-left: 0;
+    border-top: 1px solid var(--line);
+  }
+
+  .scheme-chain > .step {
+    display: contents;
+  }
+
+  .step-chain .step-button {
+    grid-row: 1;
+    position: relative;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.6rem 0.4rem 0.8rem;
+    border-radius: 16px;
+    background: transparent;
+    border-color: transparent;
+    text-align: center;
+  }
+
+  .step-chain .step-index {
+    width: 1.9rem;
+    height: 1.9rem;
+  }
+
+  .step-chain .step-tag {
+    margin-left: 0;
+  }
+
+  .step-chain .step-panel {
+    grid-row: 2;
+    grid-column: 1 / -1;
+    margin: 0;
+    border-radius: 12px;
+    border-left-width: 1px;
+    border-top: 2px solid var(--sunset);
+  }
+}

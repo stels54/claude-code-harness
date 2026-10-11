@@ -17,9 +17,15 @@ test('ссылка на файл без строк', () => {
 test('ссылка на диапазон строк', () => {
   expect(
     repoFileUrl('docs/specs/2026-10-11_public-showcase.md', { from: 3, to: 7 }),
-  ).toBe(`${blob}/docs/specs/2026-10-11_public-showcase.md#L3-L7`)
+  ).toBe(`${blob}/docs/specs/2026-10-11_public-showcase.md?plain=1#L3-L7`)
 })
 
 test('ссылка на одну строку', () => {
-  expect(repoFileUrl('README.md', { from: 5, to: 5 })).toBe(`${blob}/README.md#L5`)
+  expect(repoFileUrl('README.md', { from: 5, to: 5 })).toBe(`${blob}/README.md?plain=1#L5`)
+})
+
+test('ссылка на строки не-markdown файла без plain', () => {
+  expect(repoFileUrl('site/src/repo.ts', { from: 1, to: 2 })).toBe(
+    `${blob}/site/src/repo.ts#L1-L2`,
+  )
 })

@@ -172,9 +172,17 @@
     align-items: start;
   }
 
-  .step-aside.is-open {
+  .scheme-aside > .step {
+    display: contents;
+  }
+
+  .step-aside .step-button {
+    grid-row: 1;
+  }
+
+  .step-aside .step-panel {
+    grid-row: 2;
     grid-column: 1 / -1;
-    order: 1;
   }
 }
 

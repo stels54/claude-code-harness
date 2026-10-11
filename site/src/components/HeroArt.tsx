@@ -47,13 +47,13 @@ function HeroArt() {
         <circle cx="412" cy="96" r="20" style={faint} />
         <ellipse cx="412" cy="96" rx="48" ry="9" transform="rotate(-14 412 96)" style={ochre} />
         <circle cx="210" cy="52" r="5" style={violet} />
-        <path d="M164 30 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 z" style={ochre} />
+        <path d="M166 74 l2 6 6 2 -6 2 -2 6 -2 -6 -6 -2 6 -2 z" style={ochre} />
 
         <g style={teal}>
           <ellipse cx="252" cy="92" rx="16" ry="4" />
           <path d="M244 90 q8 -9 16 0" />
-          <ellipse cx="476" cy="54" rx="11" ry="3" />
-          <path d="M470 52 q6 -6 12 0" />
+          <ellipse cx="478" cy="90" rx="11" ry="3" />
+          <path d="M472 88 q6 -6 12 0" />
         </g>
 
         <g style={ink} strokeWidth="1.1">

@@ -41,7 +41,8 @@
 - Раскладка: до 960px цепочка — вертикальный список «таблеток» с линией
   слева; от 960px — ряд из шести «станций» на горизонтальной линии, панель
   раскрытого шага на всю ширину под рядом. Группа «Вне цепочки» от 720px —
-  три колонки, раскрытый шаг растягивается на всю ширину.
+  три кнопки в ряд; при раскрытии кнопки не растягиваются и не меняют
+  порядок, панель раскрытого шага — на всю ширину под рядом.
 
 ## 2. Чек-лист
 
@@ -86,6 +87,10 @@ DevTools → Network, включить «Disable cache», перезагрузи
 - запросов к другим доменам нет (фильтр Network по `-domain:localhost` —
   пусто), картинок PNG нет;
 - в Console ошибок нет.
+
+При повторной загрузке без «Disable cache» `assets/*.js` и `assets/*.css`
+отвечают 304, а `favicon.svg` может не запрашиваться вовсе (браузер берёт его
+из кэша) — это не дефект.
 
 ### 4.2. Внешний вид, светлая тема, широкий экран (≥ 960px)
 
@@ -144,7 +149,8 @@ Tab.
 внутри панели («harness/agents/verifier.md», ссылка на документ), затем на
 следующую кнопку `/code-review`.
 
-**Действие**: Shift+Tab обратно на `verifier`, Space.
+**Действие**: Shift+Tab три раза (ссылка на документ → «Файл команды» →
+`verifier`), Space.
 **Ожидание**: панель свёрнута. Space ещё раз — раскрыта снова; страница при
 Space не прокручивается.
 
@@ -170,16 +176,19 @@ Space не прокручивается.
 
 | Шаг | Файл команды | Документ, строки |
 |---|---|---|
-| `/roadmap` | `harness/commands/roadmap.md` | `docs/roadmaps/2026-10-11_1236_public-showcase.md#L49-L64` |
-| `/plan` | `harness/commands/plan.md` | `docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages.md#L95-L106` |
-| `/implement` | `harness/commands/implement.md` | тот же план `#L451-L454` |
-| `verifier` | `harness/agents/verifier.md` | `docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages-verify.md#L73-L76` |
-| `/code-review` | `harness/commands/code-review.md` | `docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages-review.md#L6-L13` |
-| `/manual` | `harness/commands/manual.md` | `docs/manual/2026-10-11_1347_public-showcase-3-site-skeleton-pages.md#L87-L108` |
+| `/roadmap` | `harness/commands/roadmap.md` | `docs/roadmaps/2026-10-11_1236_public-showcase.md?plain=1#L49-L64` |
+| `/plan` | `harness/commands/plan.md` | `docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages.md?plain=1#L95-L106` |
+| `/implement` | `harness/commands/implement.md` | тот же план `?plain=1#L451-L454` |
+| `verifier` | `harness/agents/verifier.md` | `docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages-verify.md?plain=1#L73-L76` |
+| `/code-review` | `harness/commands/code-review.md` | `docs/plans/2026-10-11_1333_public-showcase-3-site-skeleton-pages-review.md?plain=1#L6-L13` |
+| `/manual` | `harness/commands/manual.md` | `docs/manual/2026-10-11_1347_public-showcase-3-site-skeleton-pages.md?plain=1#L87-L108` |
 
-Все ссылки — `https://github.com/stels54/claude-code-harness/blob/main/…`;
-на GitHub подсвечен ровно тот диапазон строк, текст которого показан на
-сайте (до push в `main` строки на GitHub могут не совпадать — см. §7).
+Все ссылки — `https://github.com/stels54/claude-code-harness/blob/main/…`.
+Ссылки на документы — с `?plain=1` перед якорем строк: GitHub открывает
+исходный текст markdown (не Preview) и подсвечивает ровно тот диапазон
+строк, текст которого показан на сайте (до push в `main` строки на GitHub
+могут не совпадать — см. §7). Ссылки на файлы команд — без `?plain=1`,
+открываются отрендеренными.
 Ссылки шагов вне цепочки: `harness/commands/verify.md`,
 `harness/commands/plan-fix.md`, `harness/commands/fix-tests.md`.
 
@@ -202,7 +211,12 @@ Network) и с телефона через мобильный интернет.
 **Ожидание**: exit ≠ 0, в выводе
 `Фрагмент «roadmap» из docs/roadmaps/2026-10-11_1236_public-showcase.md:
 Маркер начала не найден: ### Пункт 33`; `npm --prefix site test` тоже
-красный (тест данных схемы). Вернуть маркер (`git checkout --
+красный: `site/src/pipeline/steps.test.ts` падает целиком на импорте
+(виртуальный модуль фрагментов не собирается, с той же ошибкой), его тесты
+не запускаются — итог `Test Files  1 failed | 5 passed (6)`,
+`Tests  27 passed (27)` (числа — на состоянии после фикс-плана
+`docs/plans/2026-10-11_1442_fix-showcase-4-links-aside-hero-h1.md`; на
+`c1c7acd` было «15 passed, 1 file failed»). Вернуть маркер (`git checkout --
 site/src/pipeline/fragment-sources.ts`), `build` → exit 0.
 
 ### 5.2. Матрица содержимого панелей
@@ -230,8 +244,10 @@ site/src/pipeline/fragment-sources.ts`), `build` → exit 0.
 ### 5.3. Широкий экран: «Вне цепочки»
 
 **Действие**: окно 720–1200px, раскрыть `/plan-fix`.
-**Ожидание**: панель растягивается на всю ширину под тремя кнопками,
-кнопки остаются в ряд.
+**Ожидание**: три кнопки остаются в ряд в исходном порядке `/verify`,
+`/plan-fix`, `/fix-tests` слева направо (как порядок Tab), раскрытая
+кнопка не растягивается; панель — на всю ширину под рядом кнопок. То же
+для `/verify` и `/fix-tests`.
 
 ## 6. Edge cases
 
@@ -266,7 +282,21 @@ site/src/pipeline/fragment-sources.ts`), `build` → exit 0.
 - Разделы «Зачем», «Устройство», «Ограничения», подвал — пункт 5; на
   странице только шапка и «Конвейер».
 - В окне Chrome через расширение ширина не сужается ниже ~606px — агент
-  проверял 360px в iframe; человек проверяет через device toolbar (§4.6).
+  проверял 360px в iframe; человек проверяет через device toolbar (§4.6)
+  или тем же iframe. Сниппет для консоли DevTools на странице стенда:
+  ```js
+  const showAt = (w) => {
+    const f = document.createElement('iframe')
+    f.src = location.href
+    const k = Math.min(1, (innerWidth - 20) / w)
+    f.style.cssText = `position:fixed;top:10px;left:10px;z-index:9999;width:${w}px;height:${Math.round((innerHeight - 20) / k)}px;border:0;outline:1px solid red;background:#fff;transform:scale(${k});transform-origin:0 0`
+    document.body.append(f)
+    return f
+  }
+  showAt(360)   // узкий экран
+  showAt(1280)  // широкий; в окне уже 1280px iframe уменьшается масштабом
+  ```
+  Убрать iframe: `document.querySelectorAll('iframe').forEach((f) => f.remove())`.
 
 ## 8. Автотесты и проверки
 

@@ -9,7 +9,8 @@ export interface LineRange {
 export function repoFileUrl(path: string, lines?: LineRange): string {
   const url = `${REPO_URL}/blob/${REPO_REF}/${path}`
   if (!lines) return url
+  const base = path.endsWith('.md') ? `${url}?plain=1` : url
   return lines.from === lines.to
-    ? `${url}#L${lines.from}`
-    : `${url}#L${lines.from}-L${lines.to}`
+    ? `${base}#L${lines.from}`
+    : `${base}#L${lines.from}-L${lines.to}`
 }

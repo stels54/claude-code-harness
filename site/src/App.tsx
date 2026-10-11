@@ -11,7 +11,9 @@ function App() {
       <main className="page">
         <header className="hero">
           <p className="hero-kicker">Claude Code · команды и агент проверки</p>
-          <h1>Конвейер разработки с ИИ-агентами</h1>
+          <h1>
+            Конвейер разработки с <span style={{ whiteSpace: 'nowrap' }}>ИИ-агентами</span>
+          </h1>
           <p className="hero-lead">
             план → реализация → изолированная проверка → ревью другой моделью
           </p>
